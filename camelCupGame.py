@@ -1,6 +1,6 @@
 class GameBoard(object):
 
-    def __init__(self):
+    def __init__(self,pieceLocations):
         import copy
         import collections
         import itertools
@@ -9,10 +9,15 @@ class GameBoard(object):
         #16 spots for game play plus one spot for winner
         for i in range(17):
             self.spots.append([])
-        self.oasisIndexes = [99]
-        self.desertIndexes = [99]
-        self.spots[1] = ['yellow','green','white']
-        self.spots[3] = ['orange','blue']
+        self.oasisIndexes = []
+        self.desertIndexes = []
+        #put pieces in spots
+        # pieceLocations = [ (1,['orange','yellow']), (2,['blue']), (3,['white','green']) ]
+        for element in pieceLocations:
+            self.spots[element[0]-1] = element[1]
+        #print(self.spots)
+        #self.spots[0] = ['orange','yellow','green','blue','white']
+        self.pieceLocations = pieceLocations
 
         # self.runOutcomesSpots = copy.deepcopy(self.spots)
         # self.runOutcomesAlreadyRolled = {"orange":False,"yellow":False,"green":False,"blue":False,"white":False}
@@ -22,6 +27,13 @@ class GameBoard(object):
     def findCurrentLocationOfPiece(self,pieceColor):
         initSpotIndexes = next(((i, color.index(pieceColor)) for i, color in enumerate(self.spots) if pieceColor in color), None)
         return initSpotIndexes
+
+    def getCurrentSpots(self):
+        self.pieceLocations = []
+        for i, spot in enumerate(self.spots):
+            if spot != []:
+                self.pieceLocations.append(copy.deepcopy((i+1,spot)))
+
 
     def moveGamePiece(self,pieceColor,rollAmount):
         #gameType True if normal move; false if runOutcome move
@@ -59,14 +71,15 @@ class GameBoard(object):
                 spotsInUse[newSpotIndex-1] = camelStack
             else:
                 spotsInUse[newSpotIndex].extend(camelStack)
+        self.getCurrentSpots
 
     def moveGameCard(self, cardType,spotIndex):
         # cardType is "desert" or "oasis"
         # spotIndex
         if cardType == "desert":
-            self.desertIndexes.extend(spotIndex)
+            self.desertIndexes.append(spotIndex-1)
         elif cartType == "oasis":
-            self.oasisIndexes.extend(spotIndex)
+            self.oasisIndexes.append(spotIndex-1)
         else:
             print("please type either 'desert' or 'oasis'")
 
@@ -92,11 +105,12 @@ class GameBoard(object):
         allOrderOfColors, allRolls = self.generateMoves()
         #print(allOrderOfColors,allRolls)
         #input Moves
+        self.getCurrentSpots
         self.allBoardStates = []
         q = 0
         for orderElement in allOrderOfColors:
             for rollElement in allRolls:
-                local_board = GameBoard()
+                local_board = GameBoard(self.pieceLocations)
                 local_board.spots = copy.deepcopy(self.spots)
                 local_board.alreadyRolled = self.alreadyRolled
                 local_board.oasisIndexes = self.oasisIndexes
@@ -130,14 +144,29 @@ class GameBoard(object):
         self.listOfRankedLists = copy.deepcopy(listOfRankedLists)
 
     def summarizeRanks(self):
+        import collections
+        allColors = ["orange","yellow","green","blue","white"]
+
         firstPositionList = [item[0] for item in self.listOfRankedLists]
         firstCounter = collections.Counter(firstPositionList)
-        print("First Place:")
-        print(firstCounter)
+        # print("First Place:")
+        # print(firstCounter)
+        firstPlaceList = []
+        for color in allColors:
+            firstPlaceList.append((color, firstCounter[color]))
 
         secondPositionList = [item[1] for item in self.listOfRankedLists]
         secondCounter = collections.Counter(secondPositionList)
-        print("And Second Place:")
-        print(secondCounter)
+        # print("And Second Place:")
+        # print(secondCounter)
+        secondPlaceList = []
+        for color in allColors:
+            secondPlaceList.append((color, secondCounter[color]))
 
-        return firstCounter, secondCounter
+        firstPlaceList.sort(key=lambda x: x[1], reverse=True)
+        secondPlaceList.sort(key=lambda x: x[1], reverse=True)
+        print("First Place:")
+        print(firstPlaceList)
+        print("Second Place:")
+        print(secondPlaceList)
+        return firstPlaceList, secondPlaceList
