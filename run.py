@@ -17,7 +17,7 @@ game_board.alreadyRolled = {"orange":False,
 
 game_board.moveGamePiece('yellow',2)
 game_board.moveGamePiece('green',1)
-game_board.moveGameCard('desert',[3])
+game_board.moveGameCard('desert',3)
 
 
 game_board.runMovesAndRecordBoards()
